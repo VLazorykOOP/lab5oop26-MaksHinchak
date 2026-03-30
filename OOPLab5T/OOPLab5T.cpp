@@ -138,6 +138,118 @@ public:
     }
 };
 
+// ======================================================
+//                   ЗАДАЧА 2.5
+// ======================================================
+
+class TreeNode {
+public:
+    int data;
+    TreeNode* left;
+    TreeNode* right;
+
+    TreeNode(int value) : data(value), left(nullptr), right(nullptr) {
+        cout << "TreeNode created: " << data << endl;
+    }
+
+    ~TreeNode() {
+        cout << "TreeNode destroyed: " << data << endl;
+    }
+};
+
+class BinarySearchTree {
+private:
+    TreeNode* root;
+
+    void destroyTree(TreeNode* node) {
+        if (!node) return;
+        destroyTree(node->left);
+        destroyTree(node->right);
+        delete node;
+    }
+
+    void reverseInorder(TreeNode* node) const {
+        if (!node) return;
+        reverseInorder(node->right);
+        cout << node->data << " ";
+        reverseInorder(node->left);
+    }
+
+public:
+    BinarySearchTree() : root(nullptr) {
+        cout << "BinarySearchTree: constructor\n";
+    }
+
+    ~BinarySearchTree() {
+        destroyTree(root);
+        cout << "BinarySearchTree: destructor\n";
+    }
+
+    void insert(int value) {
+        if (root == nullptr) {
+            root = new TreeNode(value);
+            cout << "Inserted root: " << value << endl;
+            return;
+        }
+
+        TreeNode* current = root;
+        TreeNode* parent = nullptr;
+
+        while (current != nullptr) {
+            parent = current;
+
+            if (value < current->data) {
+                current = current->left;
+            } else if (value > current->data) {
+                current = current->right;
+            } else {
+                cout << "Value " << value << " already exists. Duplicate not inserted.\n";
+                return;
+            }
+        }
+
+        if (value < parent->data) {
+            parent->left = new TreeNode(value);
+            cout << "Inserted " << value << " to the left of " << parent->data << endl;
+        } else {
+            parent->right = new TreeNode(value);
+            cout << "Inserted " << value << " to the right of " << parent->data << endl;
+        }
+    }
+
+    void breadthTraversal() const {
+        if (root == nullptr) {
+            cout << "Tree is empty.\n";
+            return;
+        }
+
+        queue<TreeNode*> q;
+        q.push(root);
+
+        cout << "Breadth-first traversal: ";
+        while (!q.empty()) {
+            TreeNode* current = q.front();
+            q.pop();
+
+            cout << current->data << " ";
+
+            if (current->left) q.push(current->left);
+            if (current->right) q.push(current->right);
+        }
+        cout << endl;
+    }
+
+    void reverseTraversal() const {
+        if (root == nullptr) {
+            cout << "Tree is empty.\n";
+            return;
+        }
+
+        cout << "Reverse traversal (descending): ";
+        reverseInorder(root);
+        cout << endl;
+    }
+};
 
 // ======================================================
 //                   ТЕСТУВАННЯ
@@ -181,6 +293,20 @@ void testTask1() {
     }
 }
 
+void testTask2() {
+    cout << "\n========== TASK 2 ==========\n";
+
+    BinarySearchTree tree;
+
+    int values[] = {50, 30, 70, 20, 40, 60, 80, 70};
+    for (int v : values) {
+        tree.insert(v);
+    }
+
+    cout << endl;
+    tree.breadthTraversal();
+    tree.reverseTraversal();
+}
 
 int main() {
     int choice;
@@ -200,12 +326,14 @@ int main() {
                 testTask1();
                 break;
             case 2:
+                testTask2();
                 break;
             case 3:
 
                 break;
             case 4:
                 testTask1();
+                testTask2();
                 break;
             case 0:
                 cout << "Program finished.\n";
