@@ -252,6 +252,153 @@ public:
 };
 
 // ======================================================
+//                   ЗАДАЧА 3.5
+// ======================================================
+
+class MyString {
+protected:
+    char* str;
+
+    void setString(const char* s) {
+        delete[] str;
+        if (s == nullptr) {
+            str = new char[1];
+            str[0] = '\0';
+            return;
+        }
+
+        str = new char[strlen(s) + 1];
+        strcpy(str, s);
+    }
+
+public:
+    MyString() {
+        str = new char[1];
+        str[0] = '\0';
+        cout << "MyString: constructor without parameters\n";
+    }
+
+    MyString(const char* s) {
+        str = nullptr;
+        setString(s);
+        cout << "MyString: constructor with parameter\n";
+    }
+
+    MyString(const MyString& other) {
+        str = nullptr;
+        setString(other.str);
+        cout << "MyString: copy constructor\n";
+    }
+
+    MyString& operator=(const MyString& other) {
+        if (this != &other) {
+            setString(other.str);
+        }
+        cout << "MyString: assignment operator\n";
+        return *this;
+    }
+
+    virtual ~MyString() {
+        delete[] str;
+        cout << "MyString: destructor\n";
+    }
+
+    virtual void print(ostream& os) const {
+        os << str;
+    }
+
+    virtual void input(istream& is) {
+        char buffer[1000];
+        is.getline(buffer, 1000);
+        setString(buffer);
+    }
+
+    friend ostream& operator<<(ostream& os, const MyString& obj) {
+        obj.print(os);
+        return os;
+    }
+
+    friend istream& operator>>(istream& is, MyString& obj) {
+        char buffer[1000];
+        is.getline(buffer, 1000);
+        obj.setString(buffer);
+        return is;
+    }
+};
+
+class DigitString : public MyString {
+private:
+    bool isDigitsOnly(const char* s) const {
+        for (int i = 0; s[i] != '\0'; i++) {
+            if (!isdigit(static_cast<unsigned char>(s[i]))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+public:
+    DigitString() : MyString() {
+        cout << "DigitString: constructor without parameters\n";
+    }
+
+    DigitString(const char* s) : MyString() {
+        if (s && isDigitsOnly(s)) {
+            setString(s);
+        } else {
+            setString("");
+            cout << "DigitString: invalid string, only digits allowed. Set to empty string.\n";
+        }
+        cout << "DigitString: constructor with parameter\n";
+    }
+
+    DigitString(const DigitString& other) : MyString(other) {
+        cout << "DigitString: copy constructor\n";
+    }
+
+    DigitString& operator=(const DigitString& other) {
+        if (this != &other) {
+            MyString::operator=(other);
+        }
+        cout << "DigitString: assignment operator\n";
+        return *this;
+    }
+
+    ~DigitString() override {
+        cout << "DigitString: destructor\n";
+    }
+
+    void print(ostream& os) const override {
+        os << str;
+    }
+
+    void input(istream& is) override {
+        char buffer[1000];
+        is.getline(buffer, 1000);
+
+        if (isDigitsOnly(buffer)) {
+            setString(buffer);
+        } else {
+            setString("");
+            cout << "Only digits are allowed. String set to empty.\n";
+        }
+    }
+
+    friend istream& operator>>(istream& is, DigitString& obj) {
+        char buffer[1000];
+        is.getline(buffer, 1000);
+
+        if (obj.isDigitsOnly(buffer)) {
+            obj.setString(buffer);
+        } else {
+            obj.setString("");
+            cout << "Only digits are allowed. String set to empty.\n";
+        }
+        return is;
+    }
+};
+
+// ======================================================
 //                   ТЕСТУВАННЯ
 // ======================================================
 
@@ -308,6 +455,46 @@ void testTask2() {
     tree.reverseTraversal();
 }
 
+void testTask3() {
+    cout << "\n========== TASK 3 ==========\n";
+
+    MyString s1("Hello world");
+    cout << "s1 = " << s1 << endl;
+
+    MyString s2 = s1;
+    cout << "s2 (copy of s1) = " << s2 << endl;
+
+    MyString s3;
+    s3 = s1;
+    cout << "s3 (assigned from s1) = " << s3 << endl;
+
+    cout << endl;
+
+    DigitString d1("123456");
+    cout << "d1 = " << d1 << endl;
+
+    DigitString d2("12ab45");
+    cout << "d2 = " << d2 << endl;
+
+    DigitString d3 = d1;
+    cout << "d3 (copy of d1) = " << d3 << endl;
+
+    DigitString d4;
+    d4 = d1;
+    cout << "d4 (assigned from d1) = " << d4 << endl;
+
+    cout << "\nEnter MyString: ";
+    cin.ignore();
+    MyString userStr;
+    cin >> userStr;
+    cout << "You entered MyString: " << userStr << endl;
+
+    cout << "Enter DigitString: ";
+    DigitString userDigitStr;
+    cin >> userDigitStr;
+    cout << "You entered DigitString: " << userDigitStr << endl;
+}
+
 int main() {
     int choice;
 
@@ -329,11 +516,12 @@ int main() {
                 testTask2();
                 break;
             case 3:
-
+                testTask3();
                 break;
             case 4:
                 testTask1();
                 testTask2();
+                testTask3();
                 break;
             case 0:
                 cout << "Program finished.\n";
